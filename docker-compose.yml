@@ -1,0 +1,132 @@
+
+name: nextcloud
+
+# Nextcloud Stack
+#
+# Author: Andreaux
+# URL: https://github.com/Andreaux/Nextcloud-Docker-Compose
+#
+# 1. Nextcloud
+# 2. MariaDB
+# 3. Redis
+# 4. Nextcloud-cronjobs
+# 5. Collabora
+
+services:
+
+# 1. Nextcloud
+
+  nextcloud:
+    image: nextcloud:30.0.0
+    container_name: nextcloud
+    depends_on:
+      db:
+        condition: service_started
+      collabora:
+        condition: service_started
+      redis:
+        condition: service_started
+    volumes:
+      - ./nextclouddata:/var/www/html
+    restart: unless-stopped
+    hostname: nc
+    domainname: ${DOMAINNAME}
+    environment:
+      - PHP_MEMORY_LIMIT=1G
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - 'REDIS_HOST_PASSWORD=${REDIS_PASSWORD}'
+    links:
+      - db
+      - redis
+    networks:
+      - proxy
+    ports:
+      # These ports are in format <host-port>:<container-port>
+      - '9000:80'
+      - '9443:443'
+
+# 2. MariaDB
+
+  db:
+    image: mariadb:11.5.2
+    container_name: ncdb
+    restart: unless-stopped
+    networks:
+      - proxy
+    ports:
+      - '3306:3306' # MySQL Port
+    environment:
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+      MYSQL_DATABASE: 'nextcloud'
+      MYSQL_USER: 'nextcloud'
+      MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
+      MARIADB_AUTO_UPGRADE: '1'
+    volumes:
+      - ./mysql:/var/lib/mysql
+
+# 3. Redis
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    networks:
+      - proxy
+    ports:
+      - '6379:6379'
+
+# 4. Nextcloud-cronjobs
+
+  nextcloud-cronjob:
+    image: rcdailey/nextcloud-cronjob
+    container_name: nextcloud-cronjob
+    depends_on:
+      nextcloud:
+        condition: service_started
+    volumes:
+      - ./nextclouddata:/var/www/html
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    environment:
+      - NEXTCLOUD_CONTAINER_NAME=nextcloud
+#      - NEXTCLOUD_PROJECT_NAME=nextcloud
+      - NEXTCLOUD_CRON_MINUTE_INTERVAL=5
+      - NEXTCLOUD_EXEC_SHELL=bash
+      - NEXTCLOUD_EXEC_SHELL_ARGS=-c
+      - NEXTCLOUD_EXEC_USER=www-data
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    networks:
+      - proxy
+
+# 5. Collabora
+
+  collabora:
+    image: collabora/code:latest
+    container_name: collabora
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+    restart: unless-stopped
+    environment:
+      - "dictionaries=en_US,hu_HU,fr_FR,de_DE"
+      - "domain=${ESCAPED_COLLABORA_DOMAINNAME}"
+      - "extra_params=--o:ssl.enable=false --o:ssl.termination=true"
+      - "LC_CTYPE=C.UTF-8"
+      - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      - "username=admin"
+      - "password=CollaboraIsSecure"
+      - "VIRTUAL_HOST=ca.${DOMAINNAME}"
+      - "VIRTUAL_PORT=9980"
+      - "VIRTUAL_PROTO=https"
+    networks:
+      - proxy
+    hostname: collabora
+    domainname: ${DOMAINNAME}
+
+networks:
+  proxy:
+    name: proxy
+    external: true
