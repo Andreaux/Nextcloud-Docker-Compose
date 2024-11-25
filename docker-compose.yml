@@ -14,10 +14,10 @@ name: nextcloud
 
 services:
 
-# 1. Nextcloud
+# 1. Nextcloud (NOTE: update the docker image version number below if needed!)
 
   nextcloud:
-    image: nextcloud:30.0.0
+    image: nextcloud:30.0.2
     container_name: nextcloud
     depends_on:
       db:
