@@ -31,7 +31,7 @@ If you use Portainer, you will have to set these within Portainer (Advanced mode
 A reverse proxy is needed to be able to provide all internal services with an SSL certificate and be able to use all services without needing to write port numbers in URLs. I found the easiest for me was to use Cloudflare and get SSL certificates through Cloudflare. A free Cloudflare account is more than enough to achieve this. While you can deploy this Stack without Traefik or Nginx Proxy Manager, you would have to set up SSL certificates for each service individually. Traefik and Nginx Proxy Manager make this otherwise tedious process effortless.
 
 This stack assumes you will be running your own Reverse Proxy (not part of this stack)
-I have previously created another stack that uses Traefik, you can check it out here: https://github.com/Andreaux/Traefik-Docker-Compose-Traefik
+I have previously created another stack that uses Traefik, you can check it out here: [https://github.com/Andreaux/Traefik-Docker-Compose-Traefik](https://github.com/Andreaux/Nextcloud-Docker-Compose-Traefik)
 
 ## Support this project
 
