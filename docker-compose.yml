@@ -17,7 +17,7 @@ services:
 # 1. Nextcloud (NOTE: update the docker image version number below if needed!)
 
   nextcloud:
-    image: nextcloud:30.0.2
+    image: nextcloud:31.0.8
     container_name: nextcloud
     depends_on:
       db:
@@ -55,6 +55,7 @@ services:
     networks:
       - proxy
     ports:
+      # These ports are in format <host-port>:<container-port>
       - '3306:3306' # MySQL Port
     environment:
       MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
@@ -77,7 +78,7 @@ services:
     ports:
       - '6379:6379'
 
-# 4. Nextcloud-cronjobs
+# 4. Nextcloud-cronjob
 
   nextcloud-cronjob:
     image: rcdailey/nextcloud-cronjob
@@ -111,13 +112,14 @@ services:
       - /etc/timezone:/etc/timezone
     restart: unless-stopped
     environment:
+      # Set your dictionary languages below. Remove any unnecessary, add missing ones.
       - "dictionaries=en_US,hu_HU,fr_FR,de_DE"
       - "domain=${ESCAPED_COLLABORA_DOMAINNAME}"
       - "extra_params=--o:ssl.enable=false --o:ssl.termination=true"
       - "LC_CTYPE=C.UTF-8"
       - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       - "username=admin"
-      - "password=CollaboraIsSecure"
+      - "password=${COLLABORA_PASSWORD}"
       - "VIRTUAL_HOST=ca.${DOMAINNAME}"
       - "VIRTUAL_PORT=9980"
       - "VIRTUAL_PROTO=https"
