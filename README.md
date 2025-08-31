@@ -1,4 +1,4 @@
-Stack version 3.0
+Stack version 3.1
 
 # Nextcloud docker-compose template with MariaDB, Redis, Nextcloud, Nextcloud-cronjobs and Collabora
 
