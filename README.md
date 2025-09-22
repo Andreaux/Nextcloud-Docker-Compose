@@ -7,7 +7,7 @@ This is my Nextcloud Docker-Compose "almost-all-in-one" template.
 The stack features separate containers for:
 - MariaDB (mariadb:11.5.2)
 - redis (redis:alpine)
-- nextcloud (nextcloud:31.0.8)
+- nextcloud (nextcloud:31.0.9)
 - collabora (collabora/code:latest)
 - nextcloud cron jobs (rcdailey/nextcloud-cronjob)
 
