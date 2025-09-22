@@ -17,7 +17,7 @@ services:
 # 1. Nextcloud (NOTE: update the docker image version number below if needed!)
 
   nextcloud:
-    image: nextcloud:31.0.8
+    image: nextcloud:31.0.9
     container_name: nextcloud
     depends_on:
       db:
