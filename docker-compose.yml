@@ -11,14 +11,16 @@ name: nextcloud
 # 3. Redis
 # 4. Nextcloud-cronjobs
 # 5. Collabora
+# 6. HaRP (Nextcloud AppAPI reverse proxy)
 
 services:
 
 # 1. Nextcloud (NOTE: update the docker image version number below if needed!)
 
   nextcloud:
-    image: nextcloud:31.0.9
+    image: nextcloud:32.0.2
     container_name: nextcloud
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_started
@@ -26,23 +28,25 @@ services:
         condition: service_started
       redis:
         condition: service_started
-    volumes:
-      - ./nextclouddata:/var/www/html
-    restart: unless-stopped
     hostname: nc
-    domainname: ${DOMAINNAME}
     environment:
+      # PHP tuning
       - PHP_MEMORY_LIMIT=1G
+      # Redis cache
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - 'REDIS_HOST_PASSWORD=${REDIS_PASSWORD}'
-    links:
-      - db
-      - redis
+      # Optional: if you want to control trusted domains via env (or do it in config.php)
+      # - NEXTCLOUD_TRUSTED_DOMAINS=nc.${DOMAINNAME}
+    volumes:
+      - ./nextclouddata:/var/www/html
     networks:
       - proxy
     ports:
       # These ports are in format <host-port>:<container-port>
+      # Only needed if you want to reach NC directly from the host.
+      # If your reverse proxy (NPM) is also in Docker and on the "proxy" network,
+      # you can remove these and point NPM directly to http://nextcloud:80.
       - '9000:80'
       - '9443:443'
 
@@ -52,11 +56,6 @@ services:
     image: mariadb:11.5.2
     container_name: ncdb
     restart: unless-stopped
-    networks:
-      - proxy
-    ports:
-      # These ports are in format <host-port>:<container-port>
-      - '3306:3306' # MySQL Port
     environment:
       MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
       MYSQL_DATABASE: 'nextcloud'
@@ -65,6 +64,11 @@ services:
       MARIADB_AUTO_UPGRADE: '1'
     volumes:
       - ./mysql:/var/lib/mysql
+    networks:
+      - proxy
+    ports:
+      # These ports are in format <host-port>:<container-port>
+      - '3306:3306' # MySQL Port
 
 # 3. Redis
 
@@ -86,10 +90,6 @@ services:
     depends_on:
       nextcloud:
         condition: service_started
-    volumes:
-      - ./nextclouddata:/var/www/html
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
     environment:
       - NEXTCLOUD_CONTAINER_NAME=nextcloud
@@ -99,6 +99,10 @@ services:
       - NEXTCLOUD_EXEC_SHELL_ARGS=-c
       - NEXTCLOUD_EXEC_USER=www-data
       - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    volumes:
+      - ./nextclouddata:/var/www/html
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - proxy
 
@@ -107,26 +111,64 @@ services:
   collabora:
     image: collabora/code:latest
     container_name: collabora
+    hostname: collabora
+    domainname: ${DOMAINNAME}
     volumes:
       - /etc/localtime:/etc/localtime
       - /etc/timezone:/etc/timezone
     restart: unless-stopped
     environment:
       # Set your dictionary languages below. Remove any unnecessary, add missing ones.
-      - "dictionaries=en_US,hu_HU,fr_FR,de_DE"
-      - "domain=${ESCAPED_COLLABORA_DOMAINNAME}"
-      - "extra_params=--o:ssl.enable=false --o:ssl.termination=true"
-      - "LC_CTYPE=C.UTF-8"
-      - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-      - "username=admin"
-      - "password=${COLLABORA_PASSWORD}"
-      - "VIRTUAL_HOST=ca.${DOMAINNAME}"
-      - "VIRTUAL_PORT=9980"
-      - "VIRTUAL_PROTO=https"
+      - dictionaries=en_US,hu_HU,fr_FR,de_DE
+      # Escaped domain for Collabora (e.g. "nextcloud\.example\.com|example\.com" in .env)
+      - domain=${ESCAPED_COLLABORA_DOMAINNAME}
+      # SSL is terminated at reverse proxy (NPM), so we disable it inside Collabora
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=true
+
+      - LC_CTYPE=C.UTF-8
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      # Collabora admin UI
+      - username=admin
+      - password=${COLLABORA_PASSWORD}
+      # These are used by common nginx-proxy / NPM-style setups
+      - VIRTUAL_HOST=ca.${DOMAINNAME}
+      - VIRTUAL_PORT=9980
+      - VIRTUAL_PROTO=https
     networks:
       - proxy
-    hostname: collabora
-    domainname: ${DOMAINNAME}
+
+# 6. HaRP (Nextcloud AppAPI reverse proxy)
+
+  appapi-harp:
+    image: ghcr.io/nextcloud/nextcloud-appapi-harp:release
+    container_name: appapi-harp
+    restart: unless-stopped
+    hostname: appapi-harp
+    environment:
+      # MUST match the shared key configured in the Nextcloud daemon
+      HP_SHARED_KEY: ${HP_SHARED_KEY}
+      # Public Nextcloud URL (same as what users see in browser and NPM)
+      NC_INSTANCE_URL: https://nc.${DOMAINNAME}
+
+      # HP_EXAPPS_ADDRESS / HP_FRP_ADDRESS use sane defaults:
+      # 0.0.0.0:8780 and 0.0.0.0:8782 inside the container.
+      # We don't set them here unless we have a special reason.
+
+      # If you want stricter IP handling and your reverse proxy is on the same
+      # network, you can optionally add something like:
+      # HP_TRUSTED_PROXY_IPS=192.168.0.0/16
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./certs:/certs
+    ports:
+      # Only needed if NPM reaches HaRP via host IP/ports.
+      # If NPM is on the same Docker network, you can skip ports
+      # and just point NPM to http://appapi-harp:8780.
+      - "8780:8780"   # HTTP API for ExApps (/exapps/)
+      - "8782:8782"   # FRP (reverse proxy tunnel)
+
+    networks:
+      - proxy
 
 networks:
   proxy:
