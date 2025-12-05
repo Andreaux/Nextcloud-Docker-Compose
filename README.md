@@ -1,15 +1,16 @@
 Stack version 3.1
 
-# Nextcloud docker-compose template with MariaDB, Redis, Nextcloud, Nextcloud-cronjobs and Collabora
+# Nextcloud docker-compose template with MariaDB, Redis, Nextcloud, Nextcloud-cronjobs, Collabora and HaRP
 
 This is my Nextcloud Docker-Compose "almost-all-in-one" template.
 
 The stack features separate containers for:
 - MariaDB (mariadb:11.5.2)
 - redis (redis:alpine)
-- nextcloud (nextcloud:31.0.9)
+- nextcloud (nextcloud:32.0.2)
 - collabora (collabora/code:latest)
 - nextcloud cron jobs (rcdailey/nextcloud-cronjob)
+- appapi-harp (ghcr.io/nextcloud/nextcloud-appapi-harp)
 
 The stack also includes dependencies to make sure the DB and Memcache (Redis) are available before the other containers are started.
 
@@ -19,6 +20,7 @@ My Home Lab runs Ubuntu Virtual Machines to host my Docker Projects where I run 
 
 NOTE:
 This docker-compose file doesn't contain the reverse proxy, if you need one, you will have to get it up and running separately. I have a stack that includes Traefik and Traefik Labels for all services, read on if interested.
+If you need help setting up Nginx Proxy Manager from Docker to support this stack, let me know!
 
 ## Environment variables
 
@@ -31,7 +33,10 @@ If you use Portainer, you will have to set these within Portainer (Advanced mode
 A reverse proxy is needed to be able to provide all internal services with an SSL certificate and be able to use all services without needing to write port numbers in URLs. I found the easiest for me was to use Cloudflare and get SSL certificates through Cloudflare. A free Cloudflare account is more than enough to achieve this. While you can deploy this Stack without Traefik or Nginx Proxy Manager, you would have to set up SSL certificates for each service individually. Traefik and Nginx Proxy Manager make this otherwise tedious process effortless.
 
 This stack assumes you will be running your own Reverse Proxy (not part of this stack)
+
 I have previously created another stack that uses Traefik, you can check it out here: [https://github.com/Andreaux/Traefik-Docker-Compose-Traefik](https://github.com/Andreaux/Nextcloud-Docker-Compose-Traefik)
+
+Ideally you would run your reverse proxy from Docker within the same 'proxy' network as this stack runs because it makes addressing the containers much easier using their container names instead of DNS names or IP addresses (e.g. 'http://nextcloud:80').
 
 ## Support this project
 
