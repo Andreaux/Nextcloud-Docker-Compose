@@ -18,7 +18,7 @@ services:
 # 1. Nextcloud (NOTE: update the docker image version number below if needed!)
 
   nextcloud:
-    image: nextcloud:32.0.2
+    image: nextcloud:32.0.3
     container_name: nextcloud
     restart: unless-stopped
     depends_on:

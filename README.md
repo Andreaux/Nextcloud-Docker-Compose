@@ -7,7 +7,7 @@ This is my Nextcloud Docker-Compose "almost-all-in-one" template.
 The stack features separate containers for:
 - MariaDB (mariadb:11.5.2)
 - redis (redis:alpine)
-- nextcloud (nextcloud:32.0.2)
+- nextcloud (nextcloud:32.0.3)
 - collabora (collabora/code:latest)
 - nextcloud cron jobs (rcdailey/nextcloud-cronjob)
 - appapi-harp (ghcr.io/nextcloud/nextcloud-appapi-harp)
@@ -34,7 +34,8 @@ A reverse proxy is needed to be able to provide all internal services with an SS
 
 This stack assumes you will be running your own Reverse Proxy (not part of this stack)
 
-I have previously created another stack that uses Traefik, you can check it out here: [https://github.com/Andreaux/Traefik-Docker-Compose-Traefik](https://github.com/Andreaux/Nextcloud-Docker-Compose-Traefik)
+I have previously created another stack that uses Traefik, you can check it out here: [https://github.com/Andreaux/Traefik-Docker-Compose-Traefik](https://github.com/Andreaux/Nextcloud-Docker-Compose-Traefik).
+Keep in mind, that it is not maintained anymore.
 
 Ideally you would run your reverse proxy from Docker within the same 'proxy' network as this stack runs because it makes addressing the containers much easier using their container names instead of DNS names or IP addresses (e.g. 'http://nextcloud:80').
 
