@@ -12,6 +12,7 @@ name: nextcloud
 # 4. Nextcloud-cronjobs
 # 5. Collabora
 # 6. HaRP (Nextcloud AppAPI reverse proxy)
+# 7. WebSocket Server for Real-time Collaboration
 
 services:
 
@@ -166,9 +167,17 @@ services:
       # and just point NPM to http://appapi-harp:8780.
       - "8780:8780"   # HTTP API for ExApps (/exapps/)
       - "8782:8782"   # FRP (reverse proxy tunnel)
-
     networks:
       - proxy
+
+# 7. WebSocket Server for Real-time Collaboration
+  nextcloud-whiteboard-server:
+    image: ghcr.io/nextcloud/whiteboard:stable
+    ports:
+      - "3002:3002"
+    environment:
+      NEXTCLOUD_URL: https://nc.${DOMAINNAME}
+      JWT_SECRET_KEY: ${WHITEBOARD_JWT_SECRET}
 
 networks:
   proxy:

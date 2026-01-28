@@ -11,6 +11,7 @@ The stack features separate containers for:
 - collabora (collabora/code:latest)
 - nextcloud cron jobs (rcdailey/nextcloud-cronjob)
 - appapi-harp (ghcr.io/nextcloud/nextcloud-appapi-harp)
+- WebSocket Server for Real-time Collaboration
 
 The stack also includes dependencies to make sure the DB and Memcache (Redis) are available before the other containers are started.
 
