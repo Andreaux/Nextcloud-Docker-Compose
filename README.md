@@ -44,7 +44,7 @@ Ideally you would run your reverse proxy from Docker within the same 'proxy' net
 
 The newest addition to the stack is the WebSocket server for real-time collaboration on the Whiteboard. A custom location needs to be set in the Proxy to enable communication between Nextcloud and the Whiteboard server:
 
-![NPM Configuration](images/whitebaord-npm-config.png)
+![NPM Configuration](images/whiteboard-npm-config.png)
 
 ## Support this project
 
