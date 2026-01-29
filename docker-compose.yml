@@ -170,14 +170,16 @@ services:
     networks:
       - proxy
 
-# 7. WebSocket Server for Real-time Collaboration
-  nextcloud-whiteboard-server:
-    image: ghcr.io/nextcloud/whiteboard:stable
-    ports:
-      - "3002:3002"
-    environment:
-      NEXTCLOUD_URL: https://nc.${DOMAINNAME}
-      JWT_SECRET_KEY: ${WHITEBOARD_JWT_SECRET}
+## 7. WebSocket Server for Real-time Collaboration
+#  nextcloud-whiteboard-server:
+#    image: ghcr.io/nextcloud/whiteboard:stable
+#    ports:
+#      - "3002:3002"
+#    environment:
+#      NEXTCLOUD_URL: https://nc.${DOMAINNAME}
+#      JWT_SECRET_KEY: ${WHITEBOARD_JWT_SECRET}
+#    networks:
+#      - proxy
 
 networks:
   proxy:
