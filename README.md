@@ -46,7 +46,7 @@ The newest addition to the stack is the WebSocket server for real-time collabora
 
 ![NPM Configuration](images/whiteboard-npm-config.png)
 
-```json
+```nginx
 rewrite ^/whiteboard/(.*)$ /$1 break;
 proxy_read_timeout 86400;
 proxy_send_timeout 86400;
