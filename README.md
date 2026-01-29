@@ -11,7 +11,7 @@ The stack features separate containers for:
 - collabora (collabora/code:latest)
 - nextcloud cron jobs (rcdailey/nextcloud-cronjob)
 - appapi-harp (ghcr.io/nextcloud/nextcloud-appapi-harp)
-- WebSocket Server for Real-time Collaboration (disabled momentarily)
+- WebSocket Server for Real-time Collaboration
 
 The stack also includes dependencies to make sure the DB and Memcache (Redis) are available before the other containers are started.
 
@@ -39,6 +39,12 @@ I have previously created another stack that uses Traefik, you can check it out 
 Keep in mind, that it is not maintained anymore.
 
 Ideally you would run your reverse proxy from Docker within the same 'proxy' network as this stack runs because it makes addressing the containers much easier using their container names instead of DNS names or IP addresses (e.g. 'http://nextcloud:80').
+
+## WebSocket server for real-time collaboration
+
+The newest addition to the stack is the WebSocket server for real-time collaboration on the Whiteboard. A custom location needs to be set in the Proxy to enable communication between Nextcloud and the Whiteboard server:
+
+![NPM Configuration](images/whitebaord-npm-config.png)
 
 ## Support this project
 

@@ -143,6 +143,9 @@ services:
   appapi-harp:
     image: ghcr.io/nextcloud/nextcloud-appapi-harp:release
     container_name: appapi-harp
+    depends_on:
+      nextcloud:
+        condition: service_started
     restart: unless-stopped
     hostname: appapi-harp
     environment:
@@ -170,16 +173,25 @@ services:
     networks:
       - proxy
 
-## 7. WebSocket Server for Real-time Collaboration
-#  nextcloud-whiteboard-server:
-#    image: ghcr.io/nextcloud/whiteboard:stable
-#    ports:
-#      - "3002:3002"
-#    environment:
-#      NEXTCLOUD_URL: https://nc.${DOMAINNAME}
-#      JWT_SECRET_KEY: ${WHITEBOARD_JWT_SECRET}
-#    networks:
-#      - proxy
+# 7. WebSocket Server for Real-time Collaboration
+#
+# Don't forget to add the custom location for the Whiteboard to Nginx.
+# See README.md for what to set.
+#
+  nextcloud-whiteboard-server:
+    image: ghcr.io/nextcloud/whiteboard:stable
+    container_name: whiteboard
+    depends_on:
+      nextcloud:
+        condition: service_started
+    ports:
+      - "3002:3002"
+    environment:
+      NEXTCLOUD_URL: https://nc.${DOMAINNAME}
+      JWT_SECRET_KEY: ${WHITEBOARD_JWT_SECRET}
+      MAX_UPLOAD_FILE_SIZE: 20971520
+    networks:
+      - proxy
 
 networks:
   proxy:
