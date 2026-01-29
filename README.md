@@ -1,6 +1,6 @@
-Stack version 3.1
+Stack version 3.2
 
-# Nextcloud docker-compose template with MariaDB, Redis, Nextcloud, Nextcloud-cronjobs, Collabora and HaRP
+# Nextcloud docker-compose template with MariaDB, Redis, Nextcloud, Nextcloud-cronjobs, Collabora, HaRP and WebSocket server
 
 This is my Nextcloud Docker-Compose "almost-all-in-one" template.
 
