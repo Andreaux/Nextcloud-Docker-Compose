@@ -184,6 +184,7 @@ services:
     depends_on:
       nextcloud:
         condition: service_started
+    restart: unless-stopped
     ports:
       - "3002:3002"
     environment:
