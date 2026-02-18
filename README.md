@@ -7,11 +7,11 @@ This is my Nextcloud Docker-Compose "almost-all-in-one" template.
 The stack features separate containers for:
 - MariaDB (mariadb:11.5.2)
 - redis (redis:alpine)
-- nextcloud (nextcloud:32.0.5)
+- nextcloud (nextcloud:32.0.6)
 - collabora (collabora/code:latest)
 - nextcloud cron jobs (rcdailey/nextcloud-cronjob)
 - appapi-harp (ghcr.io/nextcloud/nextcloud-appapi-harp)
-- WebSocket Server for Real-time Collaboration
+- WebSocket Server for Real-time Collaboration (ghcr.io/nextcloud/whiteboard:stable)
 
 The stack also includes dependencies to make sure the DB and Memcache (Redis) are available before the other containers are started.
 
