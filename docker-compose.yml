@@ -16,10 +16,13 @@ name: nextcloud
 
 services:
 
-# 1. Nextcloud (NOTE: update the docker image version number below if needed!)
+# 1. Nextcloud (NOTE: update the docker image version number below AND the Dockerfile as needed!)
 
   nextcloud:
-    image: nextcloud:32.0.8
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nextcloud-custom:33.0.2
     container_name: nextcloud
     restart: unless-stopped
     depends_on:

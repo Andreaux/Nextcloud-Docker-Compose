@@ -1,4 +1,4 @@
-Stack version 3.2
+Stack version 3.3
 
 # Nextcloud docker-compose template with MariaDB, Redis, Nextcloud, Nextcloud-cronjobs, Collabora, HaRP and WebSocket server
 
@@ -7,7 +7,7 @@ This is my Nextcloud Docker-Compose "almost-all-in-one" template.
 The stack features separate containers for:
 - MariaDB (mariadb:11.5.2)
 - redis (redis:alpine)
-- nextcloud (nextcloud:32.0.8)
+- nextcloud (nextcloud:33.0.2)
 - collabora (collabora/code:latest)
 - nextcloud cron jobs (rcdailey/nextcloud-cronjob)
 - appapi-harp (ghcr.io/nextcloud/nextcloud-appapi-harp)
@@ -22,6 +22,23 @@ My Home Lab runs Ubuntu Virtual Machines to host my Docker Projects where I run 
 NOTE:
 This docker-compose file doesn't contain the reverse proxy, if you need one, you will have to get it up and running separately. I have a stack that includes Traefik and Traefik Labels for all services, read on if interested.
 If you need help setting up Nginx Proxy Manager from Docker to support this stack, let me know!
+
+## Building the nextcloud-custom image
+
+A Dockerfile and build instructions in docker-compose.yml were added to build a custom nextcloud container image so it includes ffmpeg (needed by Recognize and Memories) which is not contained by default in the distributed official image.
+
+The build process is the following:
+
+```bash
+docker compose build nextcloud
+docker compose up -d
+```
+
+You can check if ffmpeg installed correctly once the stack is running with:
+
+```bash
+docker exec nextcloud ffmpeg -version
+```
 
 ## Environment variables
 
