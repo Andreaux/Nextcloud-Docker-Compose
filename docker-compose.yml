@@ -52,7 +52,7 @@ services:
       # If your reverse proxy (NPM) is also in Docker and on the "proxy" network,
       # you can remove these and point NPM directly to http://nextcloud:80.
       - '9000:80'
-      - '9443:443'
+#      - '9443:443'
 
 # 2. MariaDB
 
@@ -70,9 +70,8 @@ services:
       - ./mysql:/var/lib/mysql
     networks:
       - proxy
-    ports:
-      # These ports are in format <host-port>:<container-port>
-      - '3306:3306' # MySQL Port
+#    ports:
+#      - '3306:3306' # MySQL Port
 
 # 3. Redis
 
@@ -83,8 +82,8 @@ services:
     command: redis-server --requirepass ${REDIS_PASSWORD}
     networks:
       - proxy
-    ports:
-      - '6379:6379'
+#    ports:
+#      - '6379:6379'
 
 # 4. Nextcloud-cronjob
 
