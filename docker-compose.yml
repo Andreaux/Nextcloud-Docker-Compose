@@ -60,10 +60,6 @@ services:
     image: mariadb:11.5.2
     container_name: ncdb
     restart: unless-stopped
-    networks:
-      - proxy
-#    ports:
-#      - '3306:3306' # MySQL Port
     environment:
       MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
       MYSQL_DATABASE: 'nextcloud'
@@ -78,6 +74,10 @@ services:
       start_period: 1m
     volumes:
       - ./mysql:/var/lib/mysql
+    networks:
+      - proxy
+#    ports:
+#      - '3306:3306' # MySQL Port
 
 # 3. Redis
 
