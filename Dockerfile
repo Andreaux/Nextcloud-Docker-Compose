@@ -1,4 +1,5 @@
-FROM nextcloud:34.0.1
+ARG NEXTCLOUD_VERSION
+FROM nextcloud:${NEXTCLOUD_VERSION}
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ffmpeg && \
