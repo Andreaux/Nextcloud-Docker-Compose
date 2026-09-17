@@ -1,6 +1,6 @@
 name: nextcloud
 
-x-nextcloud-version: &nextcloud-version '34.0.3'
+x-nextcloud-version: &nextcloud-version '34.0.4'
 
 # Nextcloud Stack
 #
