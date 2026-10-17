@@ -60,7 +60,7 @@ services:
     image: mariadb:11.5.2
     container_name: ncdb
     restart: unless-stopped
-  command: --innodb-log-file-size=256M
+  command: --innodb-log-file-size=256M --slow-query-log=1 --long-query-time=2
     environment:
       MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
       MYSQL_DATABASE: 'nextcloud'
