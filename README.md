@@ -23,6 +23,22 @@ NOTE:
 This docker-compose file doesn't contain the reverse proxy, if you need one, you will have to get it up and running separately. I have a stack that includes Traefik and Traefik Labels for all services, read on if interested.
 If you need help setting up Nginx Proxy Manager from Docker to support this stack, let me know!
 
+## Important note regarding PHP CVE-2026-109618 and CVE-2026-109619
+
+If you are building a **new installation** of Nextcloud using this version of my docker compose stack, you're fine, continue to the next section. Nextcloud silently updated the existing 35.0.2 image without changing the tag.
+
+For **existing installations**, you need to re-build your 35.0.2 image with the following commands:
+
+```bash
+docker compose build --pull nextcloud
+docker compose up -d
+```
+After the restart, you can confirm you're running PHP 8.5.12 using these commands:
+
+```bash
+docker exec nextcloud php -v   # should report PHP 8.5.12
+```
+
 ## Building the nextcloud-custom image
 
 A Dockerfile and build instructions in docker-compose.yml were added to build a custom nextcloud container image so it includes ffmpeg (needed by Recognize and Memories) which is not contained by default in the distributed official image.

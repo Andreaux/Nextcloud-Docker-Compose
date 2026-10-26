@@ -67,6 +67,7 @@ services:
       MYSQL_USER: 'nextcloud'
       MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
       MARIADB_AUTO_UPGRADE: '1'
+      TMP_TABLE_SIZE: 64M
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
