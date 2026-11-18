@@ -105,11 +105,16 @@ openssl rand -hex 32
 
 ### 2. DNS and Nginx Proxy Manager
 
-- Create a DNS record `signaling.<DOMAINNAME>` pointing to the Docker host running this stack. Clients connect to this host for TURN, so it must be the Docker host itself, not just the NPM host.
-- Add a Proxy Host in NPM for `signaling.<DOMAINNAME>`:
-  - Scheme `http`, Forward Hostname `talk-hpb`, Forward Port `8081` (if NPM is not on the `proxy` network, use the Docker host IP and publish port 8081 in `docker-compose.yml`)
-  - Enable **Websockets Support**
-  - SSL: use your certificate for the host, Force SSL on
+The HPB needs two hostnames, because signaling goes through NPM while TURN must reach the Docker host directly:
+
+- `signaling.<DOMAINNAME>` → your **NPM** IP, like your other hostnames (HTTPS signaling)
+- `turn.<DOMAINNAME>` → the **Docker host** running this stack (TURN/STUN on port 3478). If NPM runs on the same IP as the Docker host, both records point to the same address.
+
+Add a Proxy Host in NPM for `signaling.<DOMAINNAME>`:
+
+- Scheme `http`, Forward Hostname `talk-hpb`, Forward Port `8081` (if NPM is not on the `proxy` network, use the Docker host IP and publish port 8081 in `docker-compose.yml`)
+- Enable **Websockets Support**
+- SSL: use your certificate for the host, Force SSL on
 
 ### 3. TURN port
 
@@ -119,8 +124,8 @@ Port `3478` TCP and UDP is published directly on the Docker host and must **not*
 
 Under **Administration settings → Talk**:
 
-- **STUN servers:** replace the default with `signaling.<DOMAINNAME>:3478`
-- **TURN servers:** add `turn:` only, server `signaling.<DOMAINNAME>:3478`, secret = `TALK_TURN_SECRET`, protocols **UDP and TCP**
+- **STUN servers:** replace the default with `turn.<DOMAINNAME>:3478`
+- **TURN servers:** add `turn:` only, server `turn.<DOMAINNAME>:3478`, secret = `TALK_TURN_SECRET`, protocols **UDP and TCP**
 - **High-performance backend:** URL `https://signaling.<DOMAINNAME>`, "Validate SSL certificate" on, shared secret = `TALK_SIGNALING_SECRET`
 
 Each section has a test button. The HPB should show as connected with its version. Calls with the HPB rely on the TURN server, so make sure the TURN test passes too.

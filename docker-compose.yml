@@ -198,7 +198,9 @@ services:
 #
 # Uses the official Nextcloud AIO Talk image standalone.
 # - Signaling (port 8081) is served through NPM at https://signaling.${DOMAINNAME} (WebSockets on).
+#   DNS for signaling.${DOMAINNAME} points to NPM, like your other hostnames.
 # - TURN/STUN (TALK_PORT, TCP+UDP) must be reachable directly by clients, NOT through NPM.
+#   DNS for turn.${DOMAINNAME} points to the Docker host running this stack.
 # See README.md for the NPM and Talk settings.
 #
 # OPTIONAL: only started when the "talk-hpb" profile is enabled,
@@ -214,7 +216,7 @@ services:
     environment:
       NC_DOMAIN: 'nc.${DOMAINNAME}'                # Nextcloud URL the signaling server calls back (https)
       TALK_HOST: 'talk-hpb'                        # Must match the container hostname
-      TURN_DOMAIN: 'signaling.${DOMAINNAME}'       # Host Janus uses to reach the TURN server
+      TURN_DOMAIN: 'turn.${DOMAINNAME}'            # Host Janus uses to reach the TURN server (the Docker host)
       TALK_PORT: '3478'                            # TURN/STUN port, must match the published ports below
       TURN_SECRET: '${TALK_TURN_SECRET}'
       SIGNALING_SECRET: '${TALK_SIGNALING_SECRET}'
