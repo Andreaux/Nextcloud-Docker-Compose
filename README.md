@@ -112,7 +112,7 @@ The HPB needs two hostnames, because signaling goes through NPM while TURN must 
 
 Add a Proxy Host in NPM for `signaling.<DOMAINNAME>`:
 
-- Scheme `http`, Forward Hostname `talk-hpb`, Forward Port `8081` (if NPM is not on the `proxy` network, use the Docker host IP and publish port 8081 in `docker-compose.yml`)
+- Scheme `http`, Forward Hostname = the Docker host IP, Forward Port `8081` (if NPM runs in Docker on the `proxy` network, you can use `talk-hpb` as the hostname instead and remove the `8081` port mapping from `docker-compose.yml`)
 - Enable **Websockets Support**
 - SSL: use your certificate for the host, Force SSL on
 

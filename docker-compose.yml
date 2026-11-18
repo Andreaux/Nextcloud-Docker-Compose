@@ -232,9 +232,9 @@ services:
     ports:
       - '3478:3478/tcp'
       - '3478:3478/udp'
-      # Signaling port. Only needed if NPM is NOT on the "proxy" network;
-      # otherwise point NPM to http://talk-hpb:8081.
-#      - '8081:8081'
+      # Signaling port: point NPM to http://<docker-host-ip>:8081.
+      # If NPM is in Docker on the "proxy" network, you can remove this and use http://talk-hpb:8081.
+      - '8081:8081'
     networks:
       - proxy
 
