@@ -14,6 +14,7 @@ x-nextcloud-version: &nextcloud-version '35.0.3'
 # 5. Collabora
 # 6. HaRP (Nextcloud AppAPI reverse proxy)
 # 7. WebSocket Server for Real-time Collaboration
+# 8. Talk High-performance backend (signaling, Janus, NATS, TURN)
 
 services:
 
@@ -190,6 +191,48 @@ services:
       NEXTCLOUD_URL: https://nc.${DOMAINNAME}
       JWT_SECRET_KEY: ${WHITEBOARD_JWT_SECRET}
       MAX_UPLOAD_FILE_SIZE: 20971520
+    networks:
+      - proxy
+
+# 8. Talk High-performance backend (signaling server, Janus, NATS and eturnal TURN in one container)
+#
+# Uses the official Nextcloud AIO Talk image standalone.
+# - Signaling (port 8081) is served through NPM at https://signaling.${DOMAINNAME} (WebSockets on).
+# - TURN/STUN (TALK_PORT, TCP+UDP) must be reachable directly by clients, NOT through NPM.
+# See README.md for the NPM and Talk settings.
+#
+# OPTIONAL: only started when the "talk-hpb" profile is enabled,
+# e.g. COMPOSE_PROFILES=talk-hpb in your .env file.
+#
+  talk-hpb:
+    profiles: ["talk-hpb"]
+    image: ghcr.io/nextcloud-releases/aio-talk:latest
+    container_name: talk-hpb
+    hostname: talk-hpb
+    init: true
+    restart: unless-stopped
+    environment:
+      NC_DOMAIN: 'nc.${DOMAINNAME}'                # Nextcloud URL the signaling server calls back (https)
+      TALK_HOST: 'talk-hpb'                        # Must match the container hostname
+      TURN_DOMAIN: 'signaling.${DOMAINNAME}'       # Host Janus uses to reach the TURN server
+      TALK_PORT: '3478'                            # TURN/STUN port, must match the published ports below
+      TURN_SECRET: '${TALK_TURN_SECRET}'
+      SIGNALING_SECRET: '${TALK_SIGNALING_SECRET}'
+      INTERNAL_SECRET: '${TALK_INTERNAL_SECRET}'
+    read_only: true
+    tmpfs:
+      - /run
+      - /opt/eturnal/run
+      - /conf
+      - /tmp
+    cap_drop:
+      - NET_RAW
+    ports:
+      - '3478:3478/tcp'
+      - '3478:3478/udp'
+      # Signaling port. Only needed if NPM is NOT on the "proxy" network;
+      # otherwise point NPM to http://talk-hpb:8081.
+#      - '8081:8081'
     networks:
       - proxy
 

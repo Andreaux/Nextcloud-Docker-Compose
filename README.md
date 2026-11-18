@@ -1,6 +1,6 @@
-Stack version 3.3
+Stack version 3.4
 
-# Nextcloud docker-compose template with MariaDB, Redis, Nextcloud, Nextcloud-cronjobs, Collabora, HaRP and WebSocket server
+# Nextcloud docker-compose template with MariaDB, Redis, Nextcloud, Nextcloud-cronjobs, Collabora, HaRP, WebSocket server and Talk High-performance backend
 
 This is my Nextcloud Docker-Compose "almost-all-in-one" template.
 
@@ -12,6 +12,7 @@ The stack features separate containers for:
 - nextcloud cron jobs (rcdailey/nextcloud-cronjob)
 - appapi-harp (ghcr.io/nextcloud/nextcloud-appapi-harp:release)
 - WebSocket Server for Real-time Collaboration (ghcr.io/nextcloud/whiteboard:stable)
+- Talk High-performance backend (ghcr.io/nextcloud-releases/aio-talk:latest)
 
 The stack also includes dependencies to make sure the DB and Memcache (Redis) are available before the other containers are started.
 
@@ -69,6 +70,60 @@ proxy_read_timeout 86400;
 proxy_send_timeout 86400;
 client_max_body_size 20M;
 ```
+
+## Talk High-performance backend
+
+The `talk-hpb` service runs the Nextcloud Talk High-performance backend (HPB) using the official Nextcloud AIO Talk image on its own. It bundles the signaling server, the Janus media server, NATS and the eturnal TURN/STUN server in one container. Without it, Talk calls only work well with 2-3 participants.
+
+### Enabling / disabling
+
+The HPB is **optional and disabled by default**. It uses a Docker Compose [profile](https://docs.docker.com/compose/how-tos/profiles/), so you never need to edit `docker-compose.yml` to turn it on or off.
+
+To **enable** it, add this line to your `.env` and redeploy the stack (`docker compose up -d`):
+
+```bash
+COMPOSE_PROFILES=talk-hpb
+```
+
+To **disable** it again:
+
+1. Remove the High-performance backend, TURN and STUN entries under **Administration settings → Talk**. Otherwise Talk keeps trying to reach a backend that no longer exists and calls will fail.
+2. Remove or comment out the `COMPOSE_PROFILES` line in `.env`.
+3. Stop and remove the container. Disabling the profile doesn't stop a container that is already running:
+
+```bash
+docker compose rm -sf talk-hpb
+```
+
+### 1. Secrets
+
+Add the three `TALK_*` secrets to your `.env` (see `EXAMPLE.env`). Generate each one with:
+
+```bash
+openssl rand -hex 32
+```
+
+### 2. DNS and Nginx Proxy Manager
+
+- Create a DNS record `signaling.<DOMAINNAME>` pointing to the Docker host running this stack. Clients connect to this host for TURN, so it must be the Docker host itself, not just the NPM host.
+- Add a Proxy Host in NPM for `signaling.<DOMAINNAME>`:
+  - Scheme `http`, Forward Hostname `talk-hpb`, Forward Port `8081` (if NPM is not on the `proxy` network, use the Docker host IP and publish port 8081 in `docker-compose.yml`)
+  - Enable **Websockets Support**
+  - SSL: use your certificate for the host, Force SSL on
+
+### 3. TURN port
+
+Port `3478` TCP and UDP is published directly on the Docker host and must **not** go through NPM. Make sure nothing else on the host uses port 3478. If your Nextcloud is reachable from the internet, forward 3478 TCP/UDP from your router to the Docker host. For a LAN/VPN-only setup (e.g. Tailscale with a subnet router), nothing needs forwarding.
+
+### 4. Talk settings in Nextcloud
+
+Under **Administration settings → Talk**:
+
+- **STUN servers:** replace the default with `signaling.<DOMAINNAME>:3478`
+- **TURN servers:** add `turn:` only, server `signaling.<DOMAINNAME>:3478`, secret = `TALK_TURN_SECRET`, protocols **UDP and TCP**
+- **High-performance backend:** URL `https://signaling.<DOMAINNAME>`, "Validate SSL certificate" on, shared secret = `TALK_SIGNALING_SECRET`
+
+Each section has a test button. The HPB should show as connected with its version. Calls with the HPB rely on the TURN server, so make sure the TURN test passes too.
 
 ## Support this project
 
